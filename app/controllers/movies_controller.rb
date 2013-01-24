@@ -1,7 +1,5 @@
 class MoviesController < ApplicationController
 
-  helper_method :sort_column
-
   def show
     id = params[:id] # retrieve movie ID from URI route
     @movie = Movie.find(id) # look up movie by unique ID
@@ -9,23 +7,11 @@ class MoviesController < ApplicationController
   end
 
   def index
-    #@movies = Movie.order(sort_column)
-    #@movies = Movie.all
+    
     @sort_by = params[:sort_by]
     @movies = Movie.order(@sort_by).all
-    #@by=params[:by]
-    #@movies = Movie.order(params[:by]).all
-
-    #@sort = params[:sort]
-    #@ratings = params[:ratings]
-    #@ratings_ary = @ratings ? @ratings.keys : @all_ratings
-    #@movies = Movie.where(:rating => @ratings_ary).order(@sort)
 
   end
-
-  #def sort
-   # @movies = Movie.all.sort! { |a,b| a.name.downcase <=> b.name.downcase }
-  #end
 
   def new
     # default: render 'new' template
@@ -53,10 +39,6 @@ class MoviesController < ApplicationController
     @movie.destroy
     flash[:notice] = "Movie '#{@movie.title}' deleted."
     redirect_to movies_path
-  end
-
-  def sort_column
-    Movie.column_names.include?(params[:sort]) ? params[:sort] : "title"
   end
 
 end
