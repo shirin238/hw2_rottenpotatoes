@@ -12,15 +12,30 @@ class MoviesController < ApplicationController
   end
 
   def index
-    
-    @sort_by = params[:sort_by]
+   
+    @sort_by = params[:sort_by] || session[:sort_by]
     @ratings = params[:ratings]
 
-    #@movies = Movie.order(@sort_by).all
+    case @sort_by
+      when 'title'
+        ordering,@title_header = {:order => :title}, 'hilite'
+      when 'release_date'
+        ordering,@date_header = {:order => :release_date}, 'hilite'
+    end
 
-    @selected_ratings = @ratings ? @ratings.keys : @all_ratings
+    @selected_ratings = params[:ratings] || session[:ratings] || {}
 
-    @movies = Movie.where(:rating => @selected_ratings).order(@sort_by)
+    if @selected_ratings == {}
+      @selected_ratings = Hash[@all_ratings.map {|rating| [rating, rating]}]
+    end
+
+    if params[:sort_by] != session[:sort_by] or params[:ratings] != session[:ratings]
+      session[:sort_by] = @sort_by
+      session[:ratings] = @selected_ratings
+      redirect_to :sort_by => @sort_by, :ratings => @selected_ratings and return
+    end
+
+    @movies = Movie.where(:rating => @selected_ratings.keys).order(@sort_by)
 
   end
 
@@ -51,5 +66,11 @@ class MoviesController < ApplicationController
     flash[:notice] = "Movie '#{@movie.title}' deleted."
     redirect_to movies_path
   end
+
+  def search_tmdb
+    flash[:warning] = "'#{params[:search_terms]}' was not found in TMDb."
+    redirect_to movies_path
+  end
+
 
 end
